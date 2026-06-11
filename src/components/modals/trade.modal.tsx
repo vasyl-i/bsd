@@ -1,4 +1,4 @@
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useEffect, useState } from 'react';
 import { theme } from '../../constants';
 import { CrossIcon } from '../../assets/svg';
@@ -20,20 +20,28 @@ export const TradeModal = () => {
   const btcAmount = useAppSelector(state => state.portfolio.btcAmount);
   const dispatch = useAppDispatch();
   const closeModal = () => dispatch(hideTradeModal());
-  const onPressBuy = () =>
+  const onPressBuy = () => {
     dispatch(
       btcBuy({
         currencyAmount: currencyInputValue || 0,
         btcAmount: parseFloat(btcInputValue || '0'),
       }),
     );
-  const onPressSell = () =>
+    closeModal();
+    Alert.alert(
+      `You bought ${btcInputValue} BTC for ${currencyInputValue} EUR`,
+    );
+  }
+  const onPressSell = () => {
     dispatch(
       btcSell({
         currencyAmount: currencyInputValue || 0,
         btcAmount: parseFloat(btcInputValue || '0'),
       }),
     );
+    closeModal();
+    Alert.alert(`You sold ${btcInputValue} BTC for ${currencyInputValue} EUR`);
+  }
 
   const onChangeBtc = (value: string) => {
     if (value) {

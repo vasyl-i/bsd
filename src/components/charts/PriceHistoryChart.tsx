@@ -1,6 +1,7 @@
 import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
-import { useCallback, useEffect, useState } from 'react';
-import { fetchPriceHistory } from '../../api';
+import { useEffect, useState } from 'react';
+import { PricePolling, PricePollingEmitter } from '../../native/NativePricePolling';
+import { Kline } from '../../types';
 import { Area, CartesianChart, Line } from 'victory-native';
 import { theme } from '../../constants';
 import {
@@ -38,30 +39,29 @@ export const PriceHistoryChart = () => {
     maximumFractionDigits: 2,
   });
 
-  const getPriceHistory = useCallback(() => {
-    fetchPriceHistory().then(result => {
-      setData(
-        result.map(item => {
-          return {
-            timestamp: item[0],
-            value: parseFloat(item[4]),
-          };
-        }),
-      );
-    });
-  }, []);
-
   useEffect(() => {
-    dispatch(setCurrentPrice(currentBtcValue));
-  }, [dispatch, currentBtcValue]);
+    const subscription = PricePollingEmitter.addListener(
+      'onPriceUpdate',
+      (result: Kline[]) => {
+        const parsed = result.map(item => ({
+          timestamp: item[0],
+          value: parseFloat(item[4]),
+        }));
+        setData(parsed);
+        const latestPrice = parsed[parsed.length - 1]?.value;
+        if (latestPrice != null) {
+          dispatch(setCurrentPrice(latestPrice));
+        }
+      },
+    );
 
-  useEffect(() => {
-    getPriceHistory();
-    const intervalId = setInterval(() => {
-      getPriceHistory();
-    }, 2000);
-    return () => clearInterval(intervalId);
-  }, [getPriceHistory]);
+    PricePolling.start(2000);
+
+    return () => {
+      subscription.remove();
+      PricePolling.stop();
+    };
+  }, [dispatch]);
 
   const PnL = calcPn(trades, currentBtcValue);
 
@@ -76,13 +76,19 @@ export const PriceHistoryChart = () => {
           style={styles.header}
         />
         <View style={styles.pnlRow}>
-          <Label text={'PnL: '} />
-          <Label
-            text={`${PnL >= 0 ? '+' : ''}${PnL.toFixed(2)} €`}
-            style={{
-              color: PnL >= 0 ? theme.palette.green : theme.palette.red,
-            }}
-          />
+          {isNaN(PnL) ? (
+            <Label text={' '} />
+          ) : (
+            <>
+              <Label text={'PnL: '} />
+              <Label
+                text={`${PnL >= 0 ? '+' : ''}${PnL.toFixed(2)} €`}
+                style={{
+                  color: PnL >= 0 ? theme.palette.green : theme.palette.red,
+                }}
+              />
+            </>
+          )}
         </View>
       </View>
 
@@ -215,7 +221,7 @@ export const PriceHistoryChart = () => {
                     <SkiaText
                       x={chartBounds.right - badgeWidth(prevText) + 8}
                       y={lastValue.y + 17.5}
-                      text={prevText}
+                      text={lastValue?.yValue?.toString() || ''}
                       font={font}
                       color="white"
                     />

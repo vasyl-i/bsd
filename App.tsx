@@ -20,9 +20,9 @@ function AppContent() {
     <View style={styles.container}>
       <SafeAreaProvider>
         <Provider store={store}>
-            <PersistGate persistor={persistor}>
-              <MainScreen />
-            </PersistGate>
+          <PersistGate persistor={persistor}>
+            <MainScreen />
+          </PersistGate>
         </Provider>
       </SafeAreaProvider>
     </View>
