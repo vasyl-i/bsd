@@ -1,16 +1,9 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import { NewAppScreen } from '@react-native/new-app-screen';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import { Provider } from 'react-redux';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { MainScreen } from './src/screens';
+import store, { persistor } from './src/store/store.ts';
+import { PersistGate } from 'redux-persist/integration/react';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -22,16 +15,16 @@ function App() {
     </SafeAreaProvider>
   );
 }
-
 function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
   return (
     <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
+      <SafeAreaProvider>
+        <Provider store={store}>
+            <PersistGate persistor={persistor}>
+              <MainScreen />
+            </PersistGate>
+        </Provider>
+      </SafeAreaProvider>
     </View>
   );
 }
