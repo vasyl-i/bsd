@@ -1,3 +1,32 @@
+## Hi Simon
+
+### This is simple implementation of test task.
+### Main Libraries and Tools used:
+After some investigations I decided to use victory-native for chart - as lightweight and one that uses Native render on Skia that frees up JS thread;
+https://nearform.com/open-source/victory-native
+
+Binance as API - because it is free and one of famous.
+
+
+
+
+Strating project is as for common RN CLI
+```sh
+npm install
+cd ios
+pod install
+cd ..
+npm start
+npm run ios
+npm run android
+```
+
+xCode and Android Studio can be used in terms of some build issues.
+
+### Thank you for your time and the opportunity!
+
+#
+
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 # Getting Started
